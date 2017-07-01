@@ -9,5 +9,6 @@ allowing end users to bring in end content as desired.
 
 ## References
 
-[LDN Specification](https://www.w3.org/TR/ldn/)
-[Slide deck of proposed (and speculative) IIIF Manifest and Notification Requirements](http://lombardpress.org/slides/2017-06-09-vatican-ldn)
+* [LDN Specification](https://www.w3.org/TR/ldn/)
+
+* [Slide deck of proposed (and speculative) IIIF Manifest and Notification Requirements](http://lombardpress.org/slides/2017-06-09-vatican-ldn)
