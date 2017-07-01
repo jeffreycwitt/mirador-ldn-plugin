@@ -44,13 +44,18 @@ var Ldn = {
     miradorInstance.eventEmitter.subscribe("ADD_WINDOW", function(event, data){
       _this.checkForNotifications(data);
     });
+    // miradorInstance.eventEmitter.subscribe("focusUpdated", function(event, data){
+    //   console.log("focus", data);
+    //   _this.checkForNotifications(data);
+    // });
 
     this.addEventHandlers();
   },
 
   /* injects the notification button to the window menu */
-  injectButtonToMenu: function(count){
-    $(".window-manifest-navigation").prepend(this.notificationButtonTemplate(
+  injectButtonToMenu: function(count, slot){
+    console.log("buttonslot", slot);
+    $(slot).find(".window-manifest-navigation").prepend(this.notificationButtonTemplate(
       {"count": count}
     ));
   },
@@ -71,6 +76,11 @@ var Ldn = {
   addEventHandlers: function(){
     var _this = this
     $(document).on("click", "#notifications", function(){
+      //TODO
+      //if the user is switch from one slot to another,
+      //the data stored in the ldn object will be for the manifest for the previous slot
+      // we need a trigger that recognized the button has clicked from on slot to the next
+      // and then reloads the new data for that manifest.
       _this.showNotifications();
     }.bind(this));
     $(document).on("click", ".supplement", function(e){
@@ -94,6 +104,8 @@ var Ldn = {
   removeNotifications: function(){
     $("#notifications-wrapper").remove();
   },
+
+
   checkForNotifications: function(data){
     this.notification_urls = [];
     this.data = data;
@@ -102,7 +114,7 @@ var Ldn = {
       var serviceProperty = _this.data.manifest.jsonLd.service;
       var service = [];
       if (serviceProperty === undefined){
-        service = null;
+        service = [];
       }
       else if (serviceProperty.constructor === Array){
         for (var i = 0; i < serviceProperty.length; i++){
@@ -115,10 +127,10 @@ var Ldn = {
       else if (_this.data.manifest.jsonLd.service.profile === "http://www.w3.org/ns/ldp#inbox"){
         service.push(_this.data.manifest.jsonLd.service);
       }
-      else {
+      //else {
         //no service object with the right context is found
-        service = null;
-      }
+        //service = [];
+      //}
       if (service.length > 0){
         var service_url = service[0]["@id"];
 
@@ -127,13 +139,15 @@ var Ldn = {
             dataType: 'json',
             async: true
           });
+
           inboxRequest.done(function(data){
               // 0 index means its only going to get the first notification
             for (i = 0; i < data.contains.length; i++){
             //var note_url = data.contains[0].url;
             _this.notification_urls.push(data.contains[i].url);
             }
-            _this.injectButtonToMenu(data.contains.length);
+            console.log(_this);
+            _this.injectButtonToMenu(data.contains.length, _this.data.appendTo);
             //$(".window-manifest-navigation").append("<a href='#' id='notifications'><i class='material-icons'>add_alert</i>" + data.contains.length + "</a>");
           });
         }
@@ -167,7 +181,8 @@ var Ldn = {
     });
     rangeRequest.done(function(data){
       _this.data.manifest.jsonLd.structures = data.ranges;
-      _this.data.eventEmitter.publish('structuresUpdated');
+
+      _this.data.eventEmitter.publish('structuresUpdated', _this.data.id);
     });
   }
 };
