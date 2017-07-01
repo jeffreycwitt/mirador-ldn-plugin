@@ -15,8 +15,8 @@ var Ldn = {
   },
 
   notificationButtonTemplate: Mirador.Handlebars.compile([
-    '<a href="#" id="notifications">',
-    '<i class="material-icons">add_alert</i>',
+    '<a href="#" id="notifications">{{count}}',
+    '<i class="fa fa-inbox fa-lg fa-fw" id="inbox-icon"></i>',
     '</a>',
   ].join('')),
 
@@ -49,8 +49,10 @@ var Ldn = {
   },
 
   /* injects the notification button to the window menu */
-  injectButtonToMenu: function(windowButtons){
-    $(".window-manifest-navigation").prepend(this.notificationButtonTemplate());
+  injectButtonToMenu: function(count){
+    $(".window-manifest-navigation").prepend(this.notificationButtonTemplate(
+      {"count": count}
+    ));
   },
 
   /* injects notification list to the dom */
@@ -131,7 +133,7 @@ var Ldn = {
             //var note_url = data.contains[0].url;
             _this.notification_urls.push(data.contains[i].url);
             }
-            _this.injectButtonToMenu();
+            _this.injectButtonToMenu(data.contains.length);
             //$(".window-manifest-navigation").append("<a href='#' id='notifications'><i class='material-icons'>add_alert</i>" + data.contains.length + "</a>");
           });
         }
