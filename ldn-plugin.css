@@ -1,12 +1,14 @@
 #notifications-wrapper {
   background: #efefef;
-  position: fixed;
+  position: absolute;
   width: 50%;
   height: 50%;
   top: 25%;
   left: 25%;
   padding: 10px;
   box-shadow: 3px 0px 20px 2px #000000;
+  display: none;
+  overflow-wrap: break-word;
 
 }
 

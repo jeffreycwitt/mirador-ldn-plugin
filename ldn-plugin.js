@@ -23,13 +23,12 @@ var Ldn = {
   notificationListTemplate: Mirador.Handlebars.compile([
     '<div id="notifications-wrapper">',
     '<h1>{{t "notifications"}}</h1>',
-    '<a href="#" id="notifications-close">{{t "close"}}</a>',
     '<ul id="notifications-wrapper-list"></ul>',
     '</div>'
   ].join('')),
 
   notificationListItemTemplate: Mirador.Handlebars.compile([
-    "<li><a href='#' class='supplement' data-url='{{notification}}'>{{notification}}</a></li>"
+    "<li><a href='#' class='supplement' data-url='{{notification}}' data-id='{{id}}'>{{notification}}</a></li>"
   ].join('')),
 
 
@@ -61,12 +60,14 @@ var Ldn = {
   },
 
   /* injects notification list to the dom */
-  injectNotificationListToDom: function(){
-    $(document.body).append(this.notificationListTemplate());
+  injectNotificationListToDom: function(slot){
+    console.log($(slot))
+    $(slot).append(this.notificationListTemplate());
   },
-  injectNotificationListItemToDom: function(notification){
-    $("#notifications-wrapper-list").append(this.notificationListItemTemplate({
-      "notification": notification
+  injectNotificationListItemToDom: function(notification, slot, id){
+    $(slot).find("#notifications-wrapper-list").append(this.notificationListItemTemplate({
+      "notification": notification,
+      "id": id
     }));
   },
 
@@ -75,20 +76,23 @@ var Ldn = {
   /* adds event handlers mirador */
   addEventHandlers: function(){
     var _this = this
-    $(document).on("click", "#notifications", function(){
-      //TODO
-      //if the user is switch from one slot to another,
-      //the data stored in the ldn object will be for the manifest for the previous slot
-      // we need a trigger that recognized the button has clicked from on slot to the next
-      // and then reloads the new data for that manifest.
-      _this.showNotifications();
+    $(document).on("click", "#notifications", function(e){
+      if ($(e.target).hasClass("selected")){
+        $(e.target).removeClass("selected")
+        _this.removeNotifications(e);
+      }
+      else{
+        $(e.target).addClass("selected")
+        _this.showNotifications(e);
+      }
     }.bind(this));
     $(document).on("click", ".supplement", function(e){
       var url = $(e.target).attr("data-url");
-      _this.retrieveData(url);
+      var id = $(e.target).attr("data-id");
+      _this.retrieveData(url, id);
     }.bind(this));
-    $(document).on("click", "#notifications-close", function(){
-      _this.removeNotifications();
+    $(document).on("click", "#notifications-close", function(e){
+      _this.removeNotifications(e);
     }.bind(this));
   },
 
@@ -101,8 +105,12 @@ var Ldn = {
       );
     }
   },
-  removeNotifications: function(){
-    $("#notifications-wrapper").remove();
+  removeNotifications: function(e){
+    $(e.target).closest(".slot").find("#notifications-wrapper").css({"display": "none"});
+  },
+  showNotifications: function(e){
+    console.log(e)
+    $(e.target).closest(".slot").find("#notifications-wrapper").css({"display": "block"});
   },
 
 
@@ -149,15 +157,19 @@ var Ldn = {
             console.log(_this);
             _this.injectButtonToMenu(data.contains.length, _this.data.appendTo);
             //$(".window-manifest-navigation").append("<a href='#' id='notifications'><i class='material-icons'>add_alert</i>" + data.contains.length + "</a>");
+            _this.insertNotifications();
           });
+
         }
   },
-  showNotifications: function(){
+  insertNotifications: function(){
     var _this = this;
     //var response = confirm("There is an available table of contents for this codex published by the Scholastic Commentaries and Text Archive (http://scta.info). Would you like to retrieve this table of contents?");
     //if (response === true){
     //jQuery(document.body).append("<div id='notifications-wrapper'><h1>Notifications of Related Content</h1><ul></ul></div>");
-    this.injectNotificationListToDom();
+    var slot = _this.data.appendTo
+    console.log("slot", slot)
+    this.injectNotificationListToDom(slot);
     for (i = 0; i < _this.notification_urls.length; i++){
       note_url = _this.notification_urls[i];
       var notificationRequest = jQuery.ajax({
@@ -167,12 +179,12 @@ var Ldn = {
       });
       notificationRequest.done(function(data){
         var range_url = data.object;
-        _this.injectNotificationListItemToDom(range_url);
+        _this.injectNotificationListItemToDom(range_url, slot, _this.data.id);
         //jQuery("#notifications-wrapper").append("<li><a href='#' class='supplement' data-url='" + range_url + "'>" + range_url + "</a></li>")
       });
     }
   },
-  retrieveData: function(url){
+  retrieveData: function(url, id){
     var _this = this;
     var rangeRequest = jQuery.ajax({
       url: url,
@@ -180,9 +192,11 @@ var Ldn = {
       async: true
     });
     rangeRequest.done(function(data){
+      // could get the slot id from the dom, use this id to find the manifest
+      // in thie _this.data.state object for this slot
       _this.data.manifest.jsonLd.structures = data.ranges;
 
-      _this.data.eventEmitter.publish('structuresUpdated', _this.data.id);
+      _this.data.eventEmitter.publish('structuresUpdated.' + id);
     });
   }
 };
