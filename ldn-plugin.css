@@ -1,5 +1,5 @@
-#notifications-wrapper {
-  background: #efefef;
+.mirador-container .notifications-wrapper {
+/*  background: #efefef;
   position: absolute;
   width: 50%;
   height: 50%;
@@ -8,10 +8,113 @@
   padding: 10px;
   box-shadow: 3px 0px 20px 2px #000000;
   display: none;
-  overflow-wrap: break-word;
+  overflow-wrap: break-word;*/
 
 }
 
-#inbox-icon{
-  color: #929191
+.mirador-container .mirador-btn-inbox {
+  color: #929191;
+  width: 30px;
+  margin-right: 5px;
+  position: relative;
+}
+
+.mirador-container .mirador-btn-inbox:hover {
+  color: #000;
+}
+
+.mirador-container .mirador-btn-inbox .badge-container {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  right: -3px;
+  top: -6px;
+}
+
+.mirador-container .mirador-btn-inbox .badge-count {
+  box-shadow: 0 0 0 1px #fff;
+  font-weight: 700;
+  display: block;
+  border-radius: 16px;
+  background: #CD4B5B;
+  height: 12px;
+  width: 12px;
+  color: #fff;
+  text-align: center;
+  line-height: 12px;
+  font-size: 8px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.3s;
+}
+
+.notifications-wrapper {
+}
+
+.notifications-wrapper > p {
+  margin-top: 0;
+}
+
+.notifications-wrapper-list {
+  list-style: none;
+  padding-left: 0;
+  display: table;
+  width: 100%;
+}
+
+.notifications-wrapper-list li {
+  display: table-row;
+}
+
+.notifications-wrapper-list li:nth-child(odd) {
+  background-color: #efefef;
+}
+
+.supplement-button,
+.supplement-info {
+  display: table-cell;
+  padding: 8px 0 8px 8px;
+  vertical-align: middle;
+} 
+
+.supplement-info {
+  font-size: .8em;
+}
+
+.supplement-info a {
+  border-bottom: 1px dotted #005ebd;
+}
+
+.supplement-info a:hover {
+  border-bottom: 1px dotted #ddd;
+}
+
+.supplement-info p {
+  margin: 0 0 4px 0;
+  word-wrap: break-word;
+}
+
+.supplement-button a.mirador-btn-supplement {
+  color: #fff;
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+/*  font-weight: 400;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid lightGray;*/
+  border-radius: 2px;
+  transition: border-color 0.3s ease-out;
+  background-color: deepskyblue;
+  border: none;
+}
+
+.supplement-button a:hover {
+  background-color: #00a6dd;
 }
