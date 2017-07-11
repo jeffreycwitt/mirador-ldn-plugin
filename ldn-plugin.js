@@ -4,38 +4,74 @@ var Ldn = {
 
   /* all of the needed locales */
   locales: {
-    'de': {
-      'notifications': 'Mitteilung',
-      "close": "schließen"
+    "de": {
+      "notificationModalTitle": "Mitteilung",
+      "notificationTooltip": "??",
+      "notificationModalMsg": "????",
+      "supplementBtn": "??"
     },
-    'en': {
-      'notifications': 'Notifications',
-      'close': "Close"
+    "en": {
+      "notificationModalTitle": "Notifications",
+      "notificationTooltip": "Open notification inbox",
+      "notificationModalMsg": "There are supplemental contents available for this document:",
+      "supplementBtn": "Retrieve"
+    },
+    "fr": {
+      "notificationModalTitle": "Notifications",
+      "notificationTooltip": "Ouvrir la boîte de notifications",
+      "notificationModalMsg": "Des contenus additionnels existent pour ce document :",
+      "supplementBtn": "Récupérer"
     }
   },
 
   notificationButtonTemplate: Mirador.Handlebars.compile([
-    '<a href="#" id="notifications">{{count}}',
-    '<i class="fa fa-inbox fa-lg fa-fw" id="inbox-icon"></i>',
+    '<a href="javascript:;" role="button" title="{{t "notificationTooltip"}}" aria-label="{{t "notificationTooltip"}}" class="mirador-btn mirador-btn-inbox mirador-tooltip">',
+      '<i class="fa fa-bell fa-lg fa-fw"></i>',
+      '<span class="badge-container">',
+        '<span class="badge-count">{{count}}</span>',
+      '</span>',
     '</a>',
   ].join('')),
 
-  notificationListTemplate: Mirador.Handlebars.compile([
-    '<div id="notifications-wrapper">',
-    '<h1>{{t "notifications"}}</h1>',
-    '<ul id="notifications-wrapper-list"></ul>',
+  // notificationListTemplate: Mirador.Handlebars.compile([
+  //   '<div class="notifications-wrapper">',
+  //     '<h1>{{t "notifications"}}</h1>',
+  //     '<ul class="notifications-wrapper-list"></ul>',
+  //   '</div>'
+  // ].join('')),
+
+  // notificationListItemTemplate: Mirador.Handlebars.compile([
+  //   "<li><a href='javascript:;' class='supplement' data-url='{{notification}}' data-id='{{id}}'>{{notification}}</a></li>"
+  // ].join('')),
+
+  notificationTemplate: Mirador.Handlebars.compile([
+    '<div class="notifications-wrapper">',
+      '<p>{{t "notificationModalMsg"}}</p>',
+      '<ul class="notifications-wrapper-list">',
+        '<li>',
+          '<div class="supplement-button">',
+            '<a href="javascript:;" class="supplement mirador-btn-supplement btn btn-success" data-url="{{notification}}" data-id="{{id}}">{{t "supplementBtn"}}</a>',
+          '</div>',
+          '<div class="supplement-info">',
+            '<p><a href="{{notification}}" rel="noopener" target="_blank">{{notification}}</a></p>',
+          '</div>',
+        '</li>',
+      '</ul>',
     '</div>'
   ].join('')),
 
-  notificationListItemTemplate: Mirador.Handlebars.compile([
-    "<li><a href='#' class='supplement' data-url='{{notification}}' data-id='{{id}}'>{{notification}}</a></li>"
-  ].join('')),
-
-
+  // notificationTemplate: Mirador.Handlebars.compile([
+  //   '<table class="notifications-wrapper">',
+  //     '<tr>',
+  //       "<li><a href='javascript:;' class='supplement' data-url='{{notification}}' data-id='{{id}}'>{{notification}}</a></li>",
+  //     '</tr>',
+  //   '</table>'
+  // ].join('')),
 
   /* initializes the plugin */
   init: function(miradorInstance){
-    var _this = this
+    var _this = this;
+
     i18next.on('initialized', function(){
       this.addLocalesToViewer();
     }.bind(this));
@@ -60,40 +96,63 @@ var Ldn = {
   },
 
   /* injects notification list to the dom */
-  injectNotificationListToDom: function(slot){
-    console.log($(slot))
-    $(slot).append(this.notificationListTemplate());
-  },
-  injectNotificationListItemToDom: function(notification, slot, id){
-    $(slot).find("#notifications-wrapper-list").append(this.notificationListItemTemplate({
-      "notification": notification,
-      "id": id
-    }));
-  },
+  // injectNotificationListToDom: function(slot){
+  //   //console.log($(slot))
+  //   //$(slot).append(this.notificationListTemplate());
+  //   //$(slot).append(this.notificationsDialogTemplate());
+  // },
 
-
+  // injectNotificationListItemToDom: function(notification, slot, id){
+  //   //$(slot).find("#notifications-wrapper-list").append(this.notificationListItemTemplate({
+  //   //$(slot).find("#notifications-wrapper-list").append(this.notificationTemplate({
+  //   //$(slot).find("#notifications-wrapper-list").append(this.notificationTemplate({
+  //   this.notificationTemplate({
+  //     "notification": notification,
+  //     "id": id
+  //   });
+  //   //}));
+  // },
 
   /* adds event handlers mirador */
   addEventHandlers: function(){
     var _this = this
-    $(document).on("click", "#notifications", function(e){
-      if ($(e.target).hasClass("selected")){
-        $(e.target).removeClass("selected")
-        _this.removeNotifications(e);
-      }
-      else{
-        $(e.target).addClass("selected")
-        _this.showNotifications(e);
-      }
+
+    $(document).on("click", ".mirador-btn-inbox", function(e){
+      // if ($(e.target).hasClass("selected")){
+      //   $(e.target).removeClass("selected")
+      //   _this.removeNotifications(e);
+      // }
+      // else{
+      //   $(e.target).addClass("selected")
+      //   _this.showNotifications(e);
+      // }
+      // if{
+      //   $(e.target).addClass("selected")
+      _this.showNotifications(e);
+      // }
     }.bind(this));
+
+    // $(document).on("click", "#notifications", function(e){
+    //   if ($(e.target).hasClass("selected")){
+    //     $(e.target).removeClass("selected")
+    //     _this.removeNotifications(e);
+    //   }
+    //   else{
+    //     $(e.target).addClass("selected")
+    //     _this.showNotifications(e);
+    //   }
+    // }.bind(this));
+
     $(document).on("click", ".supplement", function(e){
       var url = $(e.target).attr("data-url");
       var id = $(e.target).attr("data-id");
       _this.retrieveData(url, id);
+      bootbox.hideAll();
     }.bind(this));
-    $(document).on("click", "#notifications-close", function(e){
-      _this.removeNotifications(e);
-    }.bind(this));
+
+    // $(document).on("click", "#notifications-close", function(e){
+    //   _this.removeNotifications(e);
+    // }.bind(this));
   },
 
   /* adds the locales to the internationalization module of the viewer */
@@ -105,14 +164,24 @@ var Ldn = {
       );
     }
   },
-  removeNotifications: function(e){
-    $(e.target).closest(".slot").find("#notifications-wrapper").css({"display": "none"});
-  },
-  showNotifications: function(e){
-    console.log(e)
-    $(e.target).closest(".slot").find("#notifications-wrapper").css({"display": "block"});
-  },
 
+  // removeNotifications: function(e){
+  //   $(e.target).closest(".slot").find("#notifications-wrapper").css({"display": "none"});
+  // },
+
+  showNotifications: function(e){
+    var _this = this;
+    new Mirador.DialogBuilder().dialog({
+      title: i18next.t("notificationModalTitle"),
+      message: jQuery(_this.notificationTemplate(_this.tplData)),
+      closeButton: true,
+      className: 'mirador-dialog',
+      backdrop: true,
+      onEscape: true,
+      size: 'large'
+    });
+    //$(e.target).closest(".slot").find("#notifications-wrapper").css({"display": "block"});
+  },
 
   checkForNotifications: function(data){
     this.notification_urls = [];
@@ -149,12 +218,11 @@ var Ldn = {
           });
 
           inboxRequest.done(function(data){
-              // 0 index means its only going to get the first notification
+            // 0 index means its only going to get the first notification
             for (i = 0; i < data.contains.length; i++){
-            //var note_url = data.contains[0].url;
-            _this.notification_urls.push(data.contains[i].url);
+              //var note_url = data.contains[0].url;
+              _this.notification_urls.push(data.contains[i].url);
             }
-            console.log(_this);
             _this.injectButtonToMenu(data.contains.length, _this.data.appendTo);
             //$(".window-manifest-navigation").append("<a href='#' id='notifications'><i class='material-icons'>add_alert</i>" + data.contains.length + "</a>");
             _this.insertNotifications();
@@ -162,6 +230,7 @@ var Ldn = {
 
         }
   },
+
   insertNotifications: function(){
     var _this = this;
     //var response = confirm("There is an available table of contents for this codex published by the Scholastic Commentaries and Text Archive (http://scta.info). Would you like to retrieve this table of contents?");
@@ -169,7 +238,7 @@ var Ldn = {
     //jQuery(document.body).append("<div id='notifications-wrapper'><h1>Notifications of Related Content</h1><ul></ul></div>");
     var slot = _this.data.appendTo
     console.log("slot", slot)
-    this.injectNotificationListToDom(slot);
+    //this.injectNotificationListToDom(slot);
     for (i = 0; i < _this.notification_urls.length; i++){
       note_url = _this.notification_urls[i];
       var notificationRequest = jQuery.ajax({
@@ -179,11 +248,21 @@ var Ldn = {
       });
       notificationRequest.done(function(data){
         var range_url = data.object;
-        _this.injectNotificationListItemToDom(range_url, slot, _this.data.id);
+        //_this.injectNotificationListItemToDom(range_url, slot, _this.data.id);
+        // _this.notificationTemplate({
+        //   "notification": range_url,
+        //   "id": _this.data.id
+        // });
+        _this.tplData = {
+          "notification": range_url,
+          "id": _this.data.id
+        };
+        //jQuery(_this.notificationTemplate(_this.tplData)).appendTo(slot);
         //jQuery("#notifications-wrapper").append("<li><a href='#' class='supplement' data-url='" + range_url + "'>" + range_url + "</a></li>")
       });
     }
   },
+
   retrieveData: function(url, id){
     var _this = this;
     var rangeRequest = jQuery.ajax({
@@ -198,7 +277,7 @@ var Ldn = {
 
       _this.data.eventEmitter.publish('structuresUpdated.' + id);
     });
-  }
+  },
 };
 
 $(document).ready(function(){
