@@ -79,7 +79,7 @@
   display: table-cell;
   padding: 8px 0 8px 8px;
   vertical-align: middle;
-} 
+}
 
 .supplement-info {
   font-size: .8em;
@@ -117,4 +117,8 @@
 
 .supplement-button a:hover {
   background-color: #00a6dd;
+}
+
+.supplement-logo{
+  width: 100px
 }
