@@ -68,7 +68,6 @@ var Ldn = {
     miradorInstance.eventEmitter.subscribe("ADD_WINDOW", function(event, data){
       _this.checkForNotifications(data);
     });
-
     this.addEventHandlers();
   },
 
@@ -199,7 +198,29 @@ var Ldn = {
     });
     rangeRequest.done(function(data){
       _this.data.manifest.jsonLd.structures = data.ranges;
-      _this.data.eventEmitter.publish('structuresUpdated.' + id);
+      jQuery(_this.data.appendTo).find(".toc").remove();
+      new Mirador.TableOfContents({
+        structures: _this.data.manifest.getStructures(),
+        appendTo: _this.data.appendTo.find('.tabContentArea'),
+        windowId: _this.data.id,
+        canvasID: _this.data.canvasID,
+        manifestVersion: _this.data.manifest.getVersion(),
+        eventEmitter: _this.data.eventEmitter
+      });
+
+      // seems like the below should give me full access to window but it doesn't
+        //var windowObject = myMiradorInstance.saveController.getWindowObjectById(_this.data.id)
+      //this is an odd way to get the window object, but the above doesn't seem to work
+      slotAddress = _this.data.slotAddress;
+      var windowObject = {}
+      for (var i = 0; i < _this.data.state.slots.length; i++){
+        if (_this.data.state.slots[i].layoutAddress === slotAddress){
+          windowObject = _this.data.state.slots[i].window
+        }
+      }
+      if (windowObject.sidePanelVisible === false){
+         windowObject.sidePanelVisibility(true, '0.4s');
+      }
     });
   },
 };
