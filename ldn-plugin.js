@@ -73,7 +73,6 @@ var Ldn = {
 
   /* injects the notification button to the window menu */
   injectButtonToMenu: function(count, slot){
-    console.log("buttonslot", slot);
     $(slot).find(".window-manifest-navigation").prepend(this.notificationButtonTemplate(
       {"count": count}
     ));
@@ -148,7 +147,6 @@ var Ldn = {
           service.push({"@id": "https://rerum-inbox.firebaseio.com/messages.json?orderBy=%22target%22&equalTo=%22" + _this.data.manifest.uri + "%22"});
 
       }
-      console.log(service);
       if (service.length > 0){
         var service_url = service[0]["@id"];
 
@@ -159,7 +157,7 @@ var Ldn = {
           });
 
           inboxRequest.done(function(data){
-            console.log(data)
+
             // 0 index means its only going to get the first notification
             for (i = 0; i < data.contains.length; i++){
               //var note_url = data.contains[0].url;
@@ -186,44 +184,73 @@ var Ldn = {
       }
 
     });
-    console.log("tplData", _this.tplData);
+  },
+  parseRanges: function(data){
+    var _this = this;
+    _this.data.manifest.jsonLd.structures = data.ranges;
+
+
+   jQuery(_this.data.appendTo).find(".toc").remove();
+   new Mirador.TableOfContents({
+     structures: _this.data.manifest.getStructures(),
+     appendTo: _this.data.appendTo.find('.tabContentArea'),
+     windowId: _this.data.id,
+     canvasID: _this.data.canvasID,
+     manifestVersion: _this.data.manifest.getVersion(),
+     eventEmitter: _this.data.eventEmitter
+   });
+
+   // seems like the below should give me full access to window but it doesn't
+     //var windowObject = myMiradorInstance.saveController.getWindowObjectById(_this.data.id)
+   //this is an odd way to get the window object, but the above doesn't seem to work
+   slotAddress = _this.data.slotAddress;
+   var windowObject = {}
+   for (var i = 0; i < _this.data.state.slots.length; i++){
+     if (_this.data.state.slots[i].layoutAddress === slotAddress){
+       windowObject = _this.data.state.slots[i].window
+     }
+   }
+   if (windowObject.sidePanelVisible === false){
+      windowObject.sidePanelVisibility(true, '0.4s');
+   }
+  },
+  parseLayers: function(data){
+    var _this = this;
+    var canvasListObject = {}
+    data.otherContent.forEach(function(entry){
+      var canvasId = entry["sc:forCanvas"]
+      var listId = entry["@id"]
+      canvasListObject[canvasId] = listId;
+    });
+
+    var canvases = _this.data.manifest.jsonLd.sequences[0].canvases
+    for (i = 0; i < canvases.length; i++){
+      var canvasId = canvases[i]["@id"]
+      var listId = canvasListObject[canvasId]
+      var otherContent = {"@id": listId, "@type": "sc:AnnotationList" };
+      //clear array, since Mirador only supports what attached list
+      canvases[i].otherContent = []
+      canvases[i].otherContent.push(otherContent);
+    }
   },
 
   retrieveData: function(url, id){
     var _this = this;
-    var rangeRequest = jQuery.ajax({
+    var dataRequest = jQuery.ajax({
       url: url,
       dataType: 'json',
       async: true
     });
-    rangeRequest.done(function(data){
-      _this.data.manifest.jsonLd.structures = data.ranges;
-      jQuery(_this.data.appendTo).find(".toc").remove();
-      new Mirador.TableOfContents({
-        structures: _this.data.manifest.getStructures(),
-        appendTo: _this.data.appendTo.find('.tabContentArea'),
-        windowId: _this.data.id,
-        canvasID: _this.data.canvasID,
-        manifestVersion: _this.data.manifest.getVersion(),
-        eventEmitter: _this.data.eventEmitter
-      });
-
-      // seems like the below should give me full access to window but it doesn't
-        //var windowObject = myMiradorInstance.saveController.getWindowObjectById(_this.data.id)
-      //this is an odd way to get the window object, but the above doesn't seem to work
-      slotAddress = _this.data.slotAddress;
-      var windowObject = {}
-      for (var i = 0; i < _this.data.state.slots.length; i++){
-        if (_this.data.state.slots[i].layoutAddress === slotAddress){
-          windowObject = _this.data.state.slots[i].window
-        }
+    dataRequest.done(function(data){
+      if (data["@type"] === "sc:Range"){
+        _this.parseRanges(data)
       }
-      if (windowObject.sidePanelVisible === false){
-         windowObject.sidePanelVisibility(true, '0.4s');
+      else if (data["@type"] === "sc:Layer"){
+        _this.parseLayers(data)
       }
     });
-  },
-};
+  }
+}
 
 $(document).ready(function(){
   Ldn.init(myMiradorInstance);
