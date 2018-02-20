@@ -228,8 +228,7 @@ var Ldn = {
       var canvasId = canvases[i]["@id"];
       var listId = canvasListObject[canvasId];
       var otherContent = {"@id": listId, "@type": "sc:AnnotationList" };
-      //clear array, since Mirador only supports what attached list
-      canvases[i].otherContent = [];
+      if(!canvases[i].otherContent) canvases[i].otherContent = [];
       canvases[i].otherContent.push(otherContent);
     }
   },
