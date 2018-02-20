@@ -82,7 +82,7 @@ var Ldn = {
 
   /* adds event handlers mirador */
   addEventHandlers: function(){
-    var _this = this
+    var _this = this;
 
     $(document).on("click", ".mirador-btn-inbox", function(e){
       _this.showNotifications(e);
@@ -173,7 +173,7 @@ var Ldn = {
 
   insertNotifications: function(){
     var _this = this;
-    var slot = _this.data.appendTo
+    var slot = _this.data.appendTo;
     _this.tplData = _this.notification_urls.map(function(notification){
       return {
         url: notification["@id"],
@@ -181,7 +181,7 @@ var Ldn = {
         description: notification.description,
         logo: notification.logo,
         id: _this.data.id
-      }
+      };
 
     });
   },
@@ -204,10 +204,10 @@ var Ldn = {
      //var windowObject = myMiradorInstance.saveController.getWindowObjectById(_this.data.id)
    //this is an odd way to get the window object, but the above doesn't seem to work
    slotAddress = _this.data.slotAddress;
-   var windowObject = {}
+   var windowObject = {};
    for (var i = 0; i < _this.data.state.slots.length; i++){
      if (_this.data.state.slots[i].layoutAddress === slotAddress){
-       windowObject = _this.data.state.slots[i].window
+       windowObject = _this.data.state.slots[i].window;
      }
    }
    if (windowObject.sidePanelVisible === false){
@@ -216,17 +216,17 @@ var Ldn = {
   },
   parseLayers: function(data){
     var _this = this;
-    var canvasListObject = {}
+    var canvasListObject = {};
     data.otherContent.forEach(function(entry){
-      var canvasId = entry["sc:forCanvas"]
-      var listId = entry["@id"]
+      var canvasId = entry["sc:forCanvas"];
+      var listId = entry["@id"];
       canvasListObject[canvasId] = listId;
     });
 
-    var canvases = _this.data.manifest.jsonLd.sequences[0].canvases
+    var canvases = _this.data.manifest.jsonLd.sequences[0].canvases;
     for (i = 0; i < canvases.length; i++){
-      var canvasId = canvases[i]["@id"]
-      var listId = canvasListObject[canvasId]
+      var canvasId = canvases[i]["@id"];
+      var listId = canvasListObject[canvasId];
       var otherContent = {"@id": listId, "@type": "sc:AnnotationList" };
       //clear array, since Mirador only supports what attached list
       canvases[i].otherContent = [];
@@ -243,10 +243,10 @@ var Ldn = {
     });
     dataRequest.done(function(data){
       if (data["@type"] === "sc:Range"){
-        _this.parseRanges(data)
+        _this.parseRanges(data);
       }
       else if (data["@type"] === "sc:Layer"){
-        _this.parseLayers(data)
+        _this.parseLayers(data);
       }
     });
   }
