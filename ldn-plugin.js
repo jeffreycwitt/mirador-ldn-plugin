@@ -233,6 +233,9 @@ var Ldn = {
       if(!canvases[i].otherContent) canvases[i].otherContent = [];
       canvases[i].otherContent.push(otherContent);
     }
+
+    // ^cubap - Is this how you are carrying the myMiradorInstance?
+    _this.data.eventEmitter.publish('annotationListLoaded.' + _this.data.id);
   },
 
   parseAnnotationList: function(data){
@@ -247,12 +250,13 @@ var Ldn = {
       var canvasId = canvases[i]["@id"] ||canvases[i].id;
       if(canvasId === targetId){
 
-        if(!canvases[i].otherContent) canvases[i].otherContent = [];
+        if(!canvases[i].otherContent) {
+          canvases[i].otherContent = [];
+        }
         canvases[i].otherContent.push(data);
 
-        // _this is not the Mirador instance anymore...
-        // _this.annotationsList = _this.annotationsList.concat(data.resources);
-        // _this.eventEmitter.publish('ANNOTATIONS_LIST_UPDATED', {windowId: _this.id, annotationsList: _this.annotationsList});
+        // ^cubap - Is this how you are carrying the myMiradorInstance?
+        _this.data.eventEmitter.publish('annotationListLoaded.' + _this.data.id);
         
         break;
       }
