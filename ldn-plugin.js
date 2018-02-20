@@ -91,7 +91,9 @@ var Ldn = {
     $(document).on("click", ".supplement", function(e){
       var url = $(e.target).attr("data-url");
       var id = $(e.target).attr("data-id");
-      _this.retrieveData(url, id);
+      _this.retrieveData(url, id).done(function(){
+        $(e.target).parents("li").remove();
+      });
       bootbox.hideAll();
     }.bind(this));
   },
@@ -282,6 +284,7 @@ var Ldn = {
         break;
       }
     });
+    return dataRequest;
   }
   
 };
