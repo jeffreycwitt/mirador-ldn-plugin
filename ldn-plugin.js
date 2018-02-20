@@ -82,7 +82,7 @@ var Ldn = {
 
   /* adds event handlers mirador */
   addEventHandlers: function(){
-    var _this = this
+    var _this = this;
 
     $(document).on("click", ".mirador-btn-inbox", function(e){
       _this.showNotifications(e);
@@ -91,7 +91,9 @@ var Ldn = {
     $(document).on("click", ".supplement", function(e){
       var url = $(e.target).attr("data-url");
       var id = $(e.target).attr("data-id");
-      _this.retrieveData(url, id);
+      _this.retrieveData(url, id).done(function(){
+        $(e.target).parents("li").remove();
+      });
       bootbox.hideAll();
     }.bind(this));
   },
@@ -173,7 +175,7 @@ var Ldn = {
 
   insertNotifications: function(){
     var _this = this;
-    var slot = _this.data.appendTo
+    var slot = _this.data.appendTo;
     _this.tplData = _this.notification_urls.map(function(notification){
       return {
         url: notification["@id"],
@@ -181,10 +183,11 @@ var Ldn = {
         description: notification.description,
         logo: notification.logo,
         id: _this.data.id
-      }
+      };
 
     });
   },
+
   parseRanges: function(data){
     var _this = this;
     _this.data.manifest.jsonLd.structures = data.ranges;
@@ -204,33 +207,61 @@ var Ldn = {
      //var windowObject = myMiradorInstance.saveController.getWindowObjectById(_this.data.id)
    //this is an odd way to get the window object, but the above doesn't seem to work
    slotAddress = _this.data.slotAddress;
-   var windowObject = {}
+   var windowObject = {};
    for (var i = 0; i < _this.data.state.slots.length; i++){
      if (_this.data.state.slots[i].layoutAddress === slotAddress){
-       windowObject = _this.data.state.slots[i].window
+       windowObject = _this.data.state.slots[i].window;
      }
    }
    if (windowObject.sidePanelVisible === false){
       windowObject.sidePanelVisibility(true, '0.4s');
    }
   },
+
   parseLayers: function(data){
     var _this = this;
-    var canvasListObject = {}
+    var canvasListObject = {};
     data.otherContent.forEach(function(entry){
-      var canvasId = entry["sc:forCanvas"]
-      var listId = entry["@id"]
+      var canvasId = entry["sc:forCanvas"];
+      var listId = entry["@id"];
       canvasListObject[canvasId] = listId;
     });
 
-    var canvases = _this.data.manifest.jsonLd.sequences[0].canvases
+    var canvases = _this.data.manifest.jsonLd.sequences[0].canvases;
     for (i = 0; i < canvases.length; i++){
-      var canvasId = canvases[i]["@id"]
-      var listId = canvasListObject[canvasId]
+      var canvasId = canvases[i]["@id"];
+      var listId = canvasListObject[canvasId];
       var otherContent = {"@id": listId, "@type": "sc:AnnotationList" };
-      //clear array, since Mirador only supports what attached list
-      canvases[i].otherContent = []
+      if(!canvases[i].otherContent) canvases[i].otherContent = [];
       canvases[i].otherContent.push(otherContent);
+    }
+
+    // ^cubap - Is this how you are carrying the myMiradorInstance?
+    _this.data.eventEmitter.publish('annotationListLoaded.' + _this.data.id);
+  },
+
+  parseAnnotationList: function(data){
+    var targetId = data.on || data.target; // P3
+    if(!targetId){
+      // data loaded unknown format or untargeted list
+      return;
+    }
+    var _this = this;
+    var canvases = _this.data.manifest.jsonLd.sequences[0].canvases ||_this.data.manifest.jsonLd.sequences[0].members;
+    for (i = 0; i < canvases.length; i++){
+      var canvasId = canvases[i]["@id"] ||canvases[i].id;
+      if(canvasId === targetId){
+
+        if(!canvases[i].otherContent) {
+          canvases[i].otherContent = [];
+        }
+        canvases[i].otherContent.push(data);
+
+        // ^cubap - Is this how you are carrying the myMiradorInstance?
+        _this.data.eventEmitter.publish('annotationListLoaded.' + _this.data.id);
+        
+        break;
+      }
     }
   },
 
@@ -242,15 +273,21 @@ var Ldn = {
       async: true
     });
     dataRequest.done(function(data){
-      if (data["@type"] === "sc:Range"){
-        _this.parseRanges(data)
-      }
-      else if (data["@type"] === "sc:Layer"){
-        _this.parseLayers(data)
+      var type = data["@type"] || data.type;
+      switch(type){
+        case "sc:Range" : _this.parseRanges(data);
+        break;
+        case "sc:Layer" : _this.parseLayers(data);
+        break;
+        case "sc:AnnotationList" : _this.parseAnnotationList(data);
+        default : // No real default case, but silent failure
+        break;
       }
     });
+    return dataRequest;
   }
-}
+  
+};
 
 $(document).ready(function(){
   Ldn.init(myMiradorInstance);
