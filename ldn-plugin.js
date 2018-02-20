@@ -185,6 +185,7 @@ var Ldn = {
 
     });
   },
+
   parseRanges: function(data){
     var _this = this;
     _this.data.manifest.jsonLd.structures = data.ranges;
@@ -214,6 +215,7 @@ var Ldn = {
       windowObject.sidePanelVisibility(true, '0.4s');
    }
   },
+
   parseLayers: function(data){
     var _this = this;
     var canvasListObject = {};
@@ -233,6 +235,30 @@ var Ldn = {
     }
   },
 
+  parseAnnotationList: function(data){
+    var targetId = data.on || data.target; // P3
+    if(!targetId){
+      // data loaded unknown format or untargeted list
+      return;
+    }
+    var _this = this;
+    var canvases = _this.data.manifest.jsonLd.sequences[0].canvases ||_this.data.manifest.jsonLd.sequences[0].members;
+    for (i = 0; i < canvases.length; i++){
+      var canvasId = canvases[i]["@id"] ||canvases[i].id;
+      if(canvasId === targetId){
+
+        if(!canvases[i].otherContent) canvases[i].otherContent = [];
+        canvases[i].otherContent.push(data);
+
+        // _this is not the Mirador instance anymore...
+        // _this.annotationsList = _this.annotationsList.concat(data.resources);
+        // _this.eventEmitter.publish('ANNOTATIONS_LIST_UPDATED', {windowId: _this.id, annotationsList: _this.annotationsList});
+        
+        break;
+      }
+    }
+  },
+
   retrieveData: function(url, id){
     var _this = this;
     var dataRequest = jQuery.ajax({
@@ -241,14 +267,19 @@ var Ldn = {
       async: true
     });
     dataRequest.done(function(data){
-      if (data["@type"] === "sc:Range"){
-        _this.parseRanges(data);
-      }
-      else if (data["@type"] === "sc:Layer"){
-        _this.parseLayers(data);
+      var type = data["@type"] || data.type;
+      switch(type){
+        case "sc:Range" : _this.parseRanges(data);
+        break;
+        case "sc:Layer" : _this.parseLayers(data);
+        break;
+        case "sc:AnnotationList" : _this.parseAnnotationList(data);
+        default : // No real default case, but silent failure
+        break;
       }
     });
   }
+  
 };
 
 $(document).ready(function(){
