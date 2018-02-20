@@ -229,40 +229,8 @@ var Ldn = {
       var listId = canvasListObject[canvasId]
       var otherContent = {"@id": listId, "@type": "sc:AnnotationList" };
       //clear array, since Mirador only supports what attached list
-      canvases[i].otherContent = []
+      canvases[i].otherContent = [];
       canvases[i].otherContent.push(otherContent);
-    }
-  },
-
-  /**
-   * Process received supplements into the rendered data to update the interface.
-   * For now, Ranges and AnnotationLists
-   */
-  process: {
-    Range: function(_this,data){
-      _this.data.manifest.jsonLd.structures = data.ranges;
-      jQuery(_this.data.appendTo).find(".toc").remove();
-      new Mirador.TableOfContents({
-        structures: _this.data.manifest.getStructures(),
-        appendTo: _this.data.appendTo.find('.tabContentArea'),
-        windowId: _this.data.id,
-        canvasID: _this.data.canvasID,
-        manifestVersion: _this.data.manifest.getVersion(),
-        eventEmitter: _this.data.eventEmitter
-      });
-    },
-
-    AnnotationList: function(_this,data){
-      _this.data.manifest.jsonLd.structures = data.ranges;
-      jQuery(_this.data.appendTo).find(".toc").remove();
-      // This ain't right
-      new Mirador.AnnotationLayer({
-        annotationsList: _this.data.manifest.getStructures(),
-        windowId: _this.data.id,
-        canvasID: _this.data.canvasID,
-        manifestVersion: _this.data.manifest.getVersion(),
-        eventEmitter: _this.data.eventEmitter
-      });
     }
   },
 
@@ -282,7 +250,7 @@ var Ldn = {
       }
     });
   }
-}
+};
 
 $(document).ready(function(){
   Ldn.init(myMiradorInstance);
