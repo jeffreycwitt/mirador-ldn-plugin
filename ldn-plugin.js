@@ -236,8 +236,11 @@ var Ldn = {
       canvases[i].otherContent.push(otherContent);
     }
 
-    // ^cubap - Is this how you are carrying the myMiradorInstance?
-    _this.data.eventEmitter.publish('annotationListLoaded.' + _this.data.id);
+    // fire event for updated lists just to force a redraw
+    _this.data.eventEmitter.publish('ANNOTATIONS_LIST_UPDATED', { 
+      windowId: _this.data.id, 
+      annotationsList: []
+    });
   },
 
   parseAnnotationList: function(data){
@@ -257,8 +260,11 @@ var Ldn = {
         }
         canvases[i].otherContent.push(data);
 
-        // ^cubap - Is this how you are carrying the myMiradorInstance?
-        _this.data.eventEmitter.publish('annotationListLoaded.' + _this.data.id);
+        // fire event for updated lists just to force a redraw
+        _this.data.eventEmitter.publish('ANNOTATIONS_LIST_UPDATED', { 
+          windowId: _this.data.id, 
+          annotationsList: []
+        });
         
         break;
       }
