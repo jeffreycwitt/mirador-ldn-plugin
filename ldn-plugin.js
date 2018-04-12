@@ -236,11 +236,8 @@ var Ldn = {
       canvases[i].otherContent.push(otherContent);
     }
 
-    // fire event for updated lists just to force a redraw
-    _this.data.eventEmitter.publish('ANNOTATIONS_LIST_UPDATED', { 
-      windowId: _this.data.id, 
-      annotationsList: []
-    });
+    // This fires the updateAnnotationList which forces the annotation panel to reload and display
+    _this.data.eventEmitter.publish('updateAnnotationList.' + _this.data.id);
   },
 
   parseAnnotationList: function(data){
@@ -260,12 +257,9 @@ var Ldn = {
         }
         canvases[i].otherContent.push(data);
 
-        // fire event for updated lists just to force a redraw
-        _this.data.eventEmitter.publish('ANNOTATIONS_LIST_UPDATED', { 
-          windowId: _this.data.id, 
-          annotationsList: []
-        });
-        
+        // This fires the updateAnnotationList which forces the annotation panel to reload and display
+        _this.data.eventEmitter.publish('updateAnnotationList.' + _this.data.id);
+
         break;
       }
     }
@@ -292,7 +286,7 @@ var Ldn = {
     });
     return dataRequest;
   }
-  
+
 };
 
 $(document).ready(function(){
