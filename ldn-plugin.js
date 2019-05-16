@@ -130,7 +130,7 @@ var Ldn = {
       //if (serviceProperty === undefined){
       if (true){ //forcing use of regional st. louis inbox for the moment
         //hard coded st. louis regional inbox
-        service.push({"@id": "http://jpcloudusa015.nshostserver.net:33106/inbox/messages?target=" + _this.data.manifest.uri});
+        service.push({"@id": "https://inbox.rerum.io/messages?target=" + _this.data.manifest.uri});
       }
       else if (serviceProperty.constructor === Array){
         for (var i = 0; i < serviceProperty.length; i++){
@@ -146,7 +146,7 @@ var Ldn = {
       else {
         //no service object with the right context is found
         //hard coded st. louis regional inbox
-          service.push({"@id": "https://rerum-inbox.firebaseio.com/messages.json?orderBy=%22target%22&equalTo=%22" + _this.data.manifest.uri + "%22"});
+          service.push({"@id": "https://inbox.rerum.io/messages?orderBy=%22target%22&equalTo=%22" + _this.data.manifest.uri + "%22"});
 
       }
       if (service.length > 0){
